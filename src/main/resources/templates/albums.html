@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Login</title>
+    <title>Albums</title>
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width" />
     <base href="/" />
@@ -19,9 +19,10 @@
         <h2>Albums</h2>
 		<tr th:each="album: ${albumList}">
             <td th:text="${album.title}" /> - <td th:text="${album.id}" />
-            <div><img th:attr="src=@{${album.coverPhotoBaseUrl}}" style="width: 150px; height: 150px;"/></div>
+            <div><img th:attr="src=@{${album.coverPhotoBaseUrl}}" style="width: 220px; height: 150px;"/></div>
         </tr>
 
+        <br/>
         <a href="/duplicates" th:href="@{/duplicates}" class="btn btn-info btn-lg">
             <span class="glyphicon glyphicon-picture"></span> Duplicates
         </a>
