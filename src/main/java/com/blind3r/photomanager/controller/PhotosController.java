@@ -35,8 +35,8 @@ public class PhotosController {
 
 	@Autowired
 	PhotoLibrary library;
-	
-	@RequestMapping(value = "/photos", method = RequestMethod.GET)
+
+	@RequestMapping(value = "/accessPhotos", method = RequestMethod.GET)
 	public String getAccess(Model model) {
 		String url = null;
 		Google google = socialLoginBean.getGoogle();
@@ -52,70 +52,72 @@ public class PhotosController {
 		return "redirect:" + url;
 	}
 
-	@RequestMapping(value = "/showPhotos", method = RequestMethod.GET)
-	public String getPhotos(Model model, @RequestParam("code") String code) {
+	@RequestMapping(value = "/callbackPhotos", method = RequestMethod.GET)
+	public String callBack(Model model, @RequestParam("code") String code) {
 		Google google = socialLoginBean.getGoogle();
 
-		// Set up the Photos Library Client that interacts with the API
-		PhotosLibraryClient photosLibraryClient;
 		try {
-			photosLibraryClient = PhotosLibraryClientFactory.createClient("credentials.json", SCOPES, code,
-					google.getAccessToken());
+			// Set up the Photos Library Client that interacts with the API
+			PhotosLibraryClient photosLibraryClient = PhotosLibraryClientFactory.createClient("credentials.json",
+					SCOPES, code, google.getAccessToken());
 			library.setPhotosLibraryClient(photosLibraryClient);
-			
-			List<Album> albumList = new ArrayList<Album>();
-			ListAlbumsPagedResponse listAlbums = photosLibraryClient.listAlbums();
-			for (Album album : listAlbums.iterateAll()) {
-				albumList.add(album);
-			}
-			model.addAttribute("albumList",albumList);
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (GeneralSecurityException e) {
+		} catch (IOException | GeneralSecurityException e) {
 			e.printStackTrace();
 		}
 
 		return "photos";
 	}
-	
+
+	@RequestMapping(value = "/albums", method = RequestMethod.GET)
+	public String getPhotos(Model model) {
+		// Set up the Photos Library Client that interacts with the API
+		PhotosLibraryClient photosLibraryClient = library.getPhotosLibraryClient();
+
+		List<Album> albumList = new ArrayList<Album>();
+		ListAlbumsPagedResponse listAlbums = photosLibraryClient.listAlbums();
+		for (Album album : listAlbums.iterateAll()) {
+			albumList.add(album);
+		}
+		model.addAttribute("albumList", albumList);
+
+		return "albums";
+	}
+
 	@RequestMapping(value = "/duplicates", method = RequestMethod.GET)
 	public String findDuplicates(Model model) {
 		List<String> fileNames = new ArrayList<String>();
 		List<String> duplicateFileIds = new ArrayList<String>();
 		List<MediaItem> duplicates = new ArrayList<MediaItem>();
+		long count = 0;
 		
-		// Set up the Photos Library Client that interacts with the API
-		PhotosLibraryClient photosLibraryClient;
 		try {
-			photosLibraryClient = library.getPhotosLibraryClient();
+			// Set up the Photos Library Client that interacts with the API
+			PhotosLibraryClient photosLibraryClient = library.getPhotosLibraryClient();
 
 			ListAlbumsPagedResponse listAlbums = photosLibraryClient.listAlbums();
 			for (Album album : listAlbums.iterateAll()) {
-				SearchMediaItemsPagedResponse response = photosLibraryClient.searchMediaItems(
-						album.getId());
+				SearchMediaItemsPagedResponse response = photosLibraryClient.searchMediaItems(album.getId());
 
 				for (MediaItem item : response.iterateAll()) {
-					// Get some properties of a media item
 					String fileName = item.getFilename();
-					if(!fileNames.contains(fileName)) {
+					if (!fileNames.contains(fileName)) {
 						fileNames.add(fileName);
-					}  else if(!duplicateFileIds.contains(item.getId())) {
+					} else if (!duplicateFileIds.contains(item.getId())) {
 						duplicateFileIds.add(item.getId());
 					}
 				}
-				
-			}			
-			System.out.println("Found "+ duplicateFileIds.size() + " duplicate photos");
-			
-			for (String mediaId : duplicateFileIds) {
-				duplicates.add(photosLibraryClient.getMediaItem(mediaId));				
+				count += album.getMediaItemsCount();
 			}
-			
+			System.out.println("Found " + duplicateFileIds.size() + " duplicate photos in " + count + " total");
+
+			for (String mediaId : duplicateFileIds) {
+				duplicates.add(photosLibraryClient.getMediaItem(mediaId));
+			}
+
 		} catch (ApiException e) {
 			System.out.println(e);
 		}
-		model.addAttribute("duplicates",duplicates);
+		model.addAttribute("duplicates", duplicates);
 
 		return "duplicates";
 	}

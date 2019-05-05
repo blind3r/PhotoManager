@@ -32,7 +32,7 @@ public class PhotosLibraryClientFactory {
 	private static final java.io.File DATA_STORE_DIR = new java.io.File(
 			PhotosLibraryClientFactory.class.getResource("/").getPath(), "credentials");
 	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-	private static final String REDIRECT_URI = "http://localhost:3000/showPhotos";
+	private static final String REDIRECT_URI = "http://localhost:3000/callbackPhotos";
 
 	private PhotosLibraryClientFactory() {
 	}

@@ -14,12 +14,18 @@
 </head>
 <body>    
 	<div class="container">
+        <h1 onclick="location.href='/';">Photo Manager</h1>
+        <hr style="height:2px;border:none;color:#333;background-color:#333;" />
         <h2>Duplicate photos by name</h2>
 		<tr th:each="photo: ${duplicates}">
             <td th:text="${photo.filename}" />
             <div><img th:attr="src=@{${photo.baseUrl}}" 
-                style="width: ${photo.mediaMetadata.width}px; height: ${photo.mediaMetadata.height}px;"/></div>
+                style="width:${photo.mediaMetadata.width}px; height:${photo.mediaMetadata.height}px;"/></div>
         </tr>
+
+        <a href="/albums" th:href="@{/albums}" class="btn btn-info btn-lg">
+            <span class="glyphicon glyphicon-picture"></span> Albums
+        </a>
 	</div>
 </body>
 </html>
