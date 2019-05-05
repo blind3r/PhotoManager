@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Login</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width" />
+    <base href="/" />
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/css/bootstrap.min.css" />
+    <script type="text/javascript" src="/webjars/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/webjars/font-awesome/css/font-awesome.min.css"/>
+</head>
+<body>    
+	<div class="container">
+        <h2>Duplicate photos by name</h2>
+		<tr th:each="photo: ${duplicates}">
+            <td th:text="${photo.filename}" />
+            <div><img th:attr="src=@{${photo.baseUrl}}" 
+                style="width: ${photo.mediaMetadata.width}px; height: ${photo.mediaMetadata.height}px;"/></div>
+        </tr>
+	</div>
+</body>
+</html>
