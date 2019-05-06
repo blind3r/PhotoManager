@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.blind3r.photomanager.entities.Photo;
 import com.blind3r.photomanager.photo.PhotoLibrary;
 import com.blind3r.photomanager.photo.PhotosLibraryClientFactory;
+import com.blind3r.photomanager.repository.PhotoRepository;
 import com.blind3r.photomanager.social.providers.BaseProvider;
 import com.google.photos.library.v1.PhotosLibraryClient;
 import com.google.photos.library.v1.internal.InternalPhotosLibraryClient.ListAlbumsPagedResponse;
@@ -35,6 +37,9 @@ public class PhotosController {
 
 	@Autowired
 	PhotoLibrary library;
+	
+	@Autowired
+	PhotoRepository photoRepository;
 
 	@RequestMapping(value = "/accessPhotos", method = RequestMethod.GET)
 	public String getAccess(Model model) {
@@ -87,7 +92,7 @@ public class PhotosController {
 	public String findDuplicates(Model model) {
 		List<String> fileNames = new ArrayList<String>();
 		List<String> duplicateFileIds = new ArrayList<String>();
-		List<MediaItem> duplicates = new ArrayList<MediaItem>();
+		List<Photo> duplicates = new ArrayList<Photo>();
 		long count = 0;
 		
 		try {
@@ -109,13 +114,31 @@ public class PhotosController {
 				count += album.getMediaItemsCount();
 			}
 			System.out.println("Found " + duplicateFileIds.size() + " duplicate photos in " + count + " total");
-
+			
+			Photo photo;
 			for (String mediaId : duplicateFileIds) {
-				duplicates.add(photosLibraryClient.getMediaItem(mediaId));
+				MediaItem mediaItem = photosLibraryClient.getMediaItem(mediaId);
+				photo = new Photo(mediaId, mediaItem.getFilename(), mediaItem.getBaseUrl(),
+						mediaItem.getMediaMetadata().getWidth(), mediaItem.getMediaMetadata().getHeight());
+
+				duplicates.add(photo);
+				photoRepository.save(photo);
 			}
 
 		} catch (ApiException e) {
 			System.out.println(e);
+		}
+		model.addAttribute("duplicates", duplicates);
+
+		return "duplicates";
+	}
+	
+	@RequestMapping(value = "/listDuplicates", method = RequestMethod.GET)
+	public String listDuplicates(Model model) {
+		List<Photo> duplicates = new ArrayList<Photo>();
+		
+		for (Photo photo : photoRepository.findAll()) {
+			duplicates.add(photo);
 		}
 		model.addAttribute("duplicates", duplicates);
 

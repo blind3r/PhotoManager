@@ -93,7 +93,10 @@ public class PhotosLibraryClientFactory {
 
 		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
 				GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, clientSecrets, selectedScopes)
-						.setDataStoreFactory(new FileDataStoreFactory(DATA_STORE_DIR)).setAccessType("online").build();
+						.setDataStoreFactory(new FileDataStoreFactory(DATA_STORE_DIR))
+						.setAccessType("online")
+						.setApprovalPrompt("force")
+						.build();
 
 		return flow.newAuthorizationUrl().setRedirectUri(REDIRECT_URI).build();
 	}
